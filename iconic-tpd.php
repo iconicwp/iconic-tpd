@@ -18,14 +18,8 @@
  * @return mixed
  */
 function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
-	if ( ! isset( $GLOBALS['iconic_tpd_active_plugins'] ) ) {
-		$GLOBALS['iconic_tpd_active_plugins'] = $active_plugins;
-	}
-
-	static $new_active_plugins = null;
-
-	if ( ! is_null( $new_active_plugins ) ) {
-		return $new_active_plugins;
+	if ( ! iconic_tpd_is_enabled() ) {
+		return $active_plugins;
 	}
 
 	$to_remove = iconic_tpd_get_disabled_plugins();
@@ -47,7 +41,7 @@ add_filter( 'option_active_plugins', 'iconic_tpd_option_active_plugins', 999, 2 
  * Add versions to admin bar.
  */
 function iconic_tpd_active_plugins_menu() {
-	if ( ! current_user_can( 'administrator' ) ) {
+	if ( ! iconic_tpd_is_enabled() ) {
 		return;
 	}
 
@@ -105,14 +99,30 @@ function iconic_tpd_get_action_url( $plugin_path, $type ) {
  * @return mixed|void
  */
 function iconic_tpd_get_unfiltered_active_plugins( $active_plugins = array() ) {
-	return isset( $GLOBALS['iconic_tpd_active_plugins'] ) ? $GLOBALS['iconic_tpd_active_plugins'] : $active_plugins;
+	global $wpdb;
+
+	static $active_plugins = array();
+
+	if ( ! empty( $active_plugins ) ) {
+		return $active_plugins;
+	}
+
+	$active_plugins_var = $wpdb->get_var( "SELECT option_value FROM $wpdb->options WHERE option_name = 'active_plugins'" );
+
+	if ( empty( $active_plugins_var ) || is_wp_error( $active_plugins_var ) ) {
+		return $active_plugins;
+	}
+
+	$active_plugins = maybe_unserialize( $active_plugins_var );
+
+	return (array) $active_plugins;
 }
 
 /**
  * Add scroll to admin menu.
  */
 function iconic_tpd_header_styles() {
-	if ( ! current_user_can( 'administrator' ) ) {
+	if ( ! iconic_tpd_is_enabled() ) {
 		return;
 	}
 
@@ -141,11 +151,16 @@ function iconic_tpd_header_styles() {
 }
 
 add_action( 'wp_head', 'iconic_tpd_header_styles' );
+add_action( 'admin_head', 'iconic_tpd_header_styles' );
 
 /**
  * Process action URL.
  */
 function iconic_tpd_process_action() {
+	if ( ! iconic_tpd_is_enabled() ) {
+		return;
+	}
+
 	$action = filter_input( INPUT_GET, 'action', FILTER_SANITIZE_STRING );
 
 	if ( 'iconic-tpd-set' !== $action ) {
@@ -192,4 +207,26 @@ add_action( 'admin_init', 'iconic_tpd_process_action' );
  */
 function iconic_tpd_get_disabled_plugins() {
 	return (array) get_option( 'iconic_tpd' );
+}
+
+/**
+ * Check if user is administrator.
+ *
+ * @return bool
+ */
+function iconic_tpd_is_enabled() {
+	if ( ! function_exists( 'wp_get_current_user' ) ) {
+		include ABSPATH . 'wp-includes/pluggable.php';
+	}
+
+	return current_user_can( 'administrator' ) && ! iconic_tpd_is_plugins_page();
+}
+
+/**
+ * Is this this plugins screen?
+ *
+ * @return bool
+ */
+function iconic_tpd_is_plugins_page() {
+	return strpos( $_SERVER['REQUEST_URI'], '/wp-admin/plugins.php' ) === 0;
 }
