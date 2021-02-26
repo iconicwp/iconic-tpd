@@ -6,7 +6,7 @@ From here you can click each active plugin to temporarily disable it. Click it a
 
 **Important:** This won't work unless it's installed as a [must-use plugin](https://wordpress.org/support/article/must-use-plugins/).
 
-![Image of Temporary Plugin Deactivation by Iconic](https://github.com/iconicwp/iconic-tpd/blob/master/github/plugins-menu.png?raw=true =323x)
+<img src="https://github.com/iconicwp/iconic-tpd/blob/master/github/plugins-menu.png?raw=true" width="323" height="438" alt="Image of Temporary Plugin Deactivation by Iconic">
 
 ## Installation
 
