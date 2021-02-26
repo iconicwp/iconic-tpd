@@ -25,7 +25,9 @@ function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
 	static $new_active_plugins = null;
 
 	if ( ! is_null( $new_active_plugins ) ) {
-		return $new_active_plugins;
+		// Return normal list of active plugins after
+		// first time, to avoid conflicts.
+		return $active_plugins;
 	}
 
 	$to_remove = iconic_tpd_get_disabled_plugins();
@@ -60,6 +62,7 @@ function iconic_tpd_active_plugins_menu() {
 	$menu_id                   = 'iconic-active-plugins';
 	$plugins                   = get_plugins();
 	$active_plugins            = get_option( 'active_plugins' );
+	$disabled_plugins          = iconic_tpd_get_disabled_plugins();
 	$unfiltered_active_plugins = iconic_tpd_get_unfiltered_active_plugins( $active_plugins );
 
 	$wp_admin_bar->add_menu( array( 'id' => $menu_id, 'title' => __( 'Plugins', 'iconic-tdp' ), 'href' => '' ) );
@@ -69,7 +72,7 @@ function iconic_tpd_active_plugins_menu() {
 			continue;
 		}
 
-		$is_active = in_array( $path, $active_plugins, true );
+		$is_active = ! in_array( $path, $disabled_plugins, true );
 		$title     = $is_active ? sprintf( '<span>%s</span>', $plugin['Name'] ) : sprintf( '<del>%s</del>', $plugin['Name'] );
 		$href      = iconic_tpd_get_action_url( $path, $is_active ? 'disable' : 'enable' );
 
@@ -135,7 +138,7 @@ function iconic_tpd_header_styles() {
 	?>
 	<style type="text/css">
 		.ab-sub-wrapper {
-			max-height: 400px;
+			max-height: 402px;
 			overflow-y: scroll;
 		}
 
