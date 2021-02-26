@@ -22,6 +22,12 @@ function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
 		return $active_plugins;
 	}
 
+	static $new_active_plugins = null;
+
+	if ( ! is_null( $new_active_plugins ) ) {
+		return $new_active_plugins;
+	}
+
 	$to_remove = iconic_tpd_get_disabled_plugins();
 
 	$new_active_plugins = $active_plugins;
@@ -206,11 +212,11 @@ add_action( 'admin_init', 'iconic_tpd_process_action' );
  * @return array
  */
 function iconic_tpd_get_disabled_plugins() {
-	return (array) get_option( 'iconic_tpd' );
+	return array_filter( get_option( 'iconic_tpd', array() ) );
 }
 
 /**
- * Check if user is administrator.
+ * Check if TPD should be enabled.
  *
  * @return bool
  */
@@ -219,14 +225,5 @@ function iconic_tpd_is_enabled() {
 		include ABSPATH . 'wp-includes/pluggable.php';
 	}
 
-	return current_user_can( 'administrator' ) && ! iconic_tpd_is_plugins_page();
-}
-
-/**
- * Is this this plugins screen?
- *
- * @return bool
- */
-function iconic_tpd_is_plugins_page() {
-	return strpos( $_SERVER['REQUEST_URI'], '/wp-admin/plugins.php' ) === 0;
+	return current_user_can( 'administrator' ) && ! is_admin();
 }
