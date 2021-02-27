@@ -18,7 +18,7 @@ function iconic_tpd_boot() {
 	}
 
 	// Boot only for administrators.
-	if ( ! current_user_can( 'administrator' ) || did_action( 'load-plugins.php' ) {
+	if ( ! current_user_can( 'administrator' ) || strpos( $_SERVER['REQUEST_URI'], '/wp-admin/plugins.php' ) !== false {
 		return;
 	}
 
@@ -35,8 +35,8 @@ add_action( 'muplugins_loaded', 'iconic_tpd_boot' );
 /**
  * Deactivate plugins temporarily.
  *
- * @param $active_plugins
- * @param $option_name
+ * @param array  $active_plugins
+ * @param string $option_name
  *
  * @return mixed
  */
@@ -96,8 +96,8 @@ function iconic_tpd_active_plugins_menu() {
 /**
  * Get action URL.
  *
- * @param $plugin_path
- * @param $type
+ * @param string $plugin_path
+ * @param string $type
  *
  * @return string
  */
