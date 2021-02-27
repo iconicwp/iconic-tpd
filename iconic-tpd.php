@@ -234,5 +234,5 @@ function is_enabled() {
 		include ABSPATH . 'wp-includes/pluggable.php';
 	}
 
-	return current_user_can( 'administrator' ) && ! is_admin();
+	return current_user_can( 'administrator' ) && strpos( $_SERVER['REQUEST_URI'], '/wp-admin/plugins.php' ) !== 0;
 }
