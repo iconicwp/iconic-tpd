@@ -12,7 +12,7 @@
 /**
  * Deactivate plugins temporarily.
  *
- * @param array $active_plugins
+ * @param array  $active_plugins
  * @param string $option_name
  *
  * @return mixed
