@@ -1,6 +1,6 @@
 # Temporary Plugin Deactivation by Iconic
 
-This is a "must-use" plugin which adds a "Plugins" dropdown to the **frontend admin bar menu** for admin users. 
+This is a "must-use" plugin which adds a "Plugins" dropdown to the **admin bar menu** for admin users. 
 
 From here you can click each active plugin to temporarily disable it. Click it again to turn it back on.
 

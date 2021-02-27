@@ -17,8 +17,9 @@ function iconic_tpd_boot() {
 		include ABSPATH . 'wp-includes/pluggable.php';
 	}
 
+	$current_screen = get_current_screen();
 	// Boot only for administrators on the front-end.
-	if ( ! current_user_can( 'administrator' ) || is_admin() ) {
+	if ( ! current_user_can( 'administrator' ) || 'plugins' === $current_screen->id ) {
 		return;
 	}
 
