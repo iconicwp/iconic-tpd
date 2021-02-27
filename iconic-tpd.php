@@ -9,6 +9,12 @@
  * Text Domain: iconic-tdp
  */
 
+namespace Iconic\Temporarily_Disable_Plugins;
+
+use function add_action;
+use function add_filter;
+// TODO Import all WordPress function.
+
 /**
  * Deactivate plugins temporarily.
  *
@@ -17,8 +23,8 @@
  *
  * @return mixed
  */
-function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
-	if ( ! iconic_tpd_is_enabled() ) {
+function option_active_plugins( $active_plugins, $option_name ) {
+	if ( ! is_enabled() ) {
 		return $active_plugins;
 	}
 
@@ -30,7 +36,7 @@ function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
 		return $active_plugins;
 	}
 
-	$to_remove = iconic_tpd_get_disabled_plugins();
+	$to_remove = get_disabled_plugins();
 
 	$new_active_plugins = $active_plugins;
 
@@ -43,13 +49,13 @@ function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
 	return $new_active_plugins;
 }
 
-add_filter( 'option_active_plugins', 'iconic_tpd_option_active_plugins', 999, 2 );
+add_filter( 'option_active_plugins', __NAMESPACE__ . '\\option_active_plugins', 999, 2 );
 
 /**
  * Add versions to admin bar.
  */
-function iconic_tpd_active_plugins_menu() {
-	if ( ! iconic_tpd_is_enabled() ) {
+function active_plugins_menu() {
+	if ( ! is_enabled() ) {
 		return;
 	}
 
@@ -62,8 +68,8 @@ function iconic_tpd_active_plugins_menu() {
 	$menu_id                   = 'iconic-active-plugins';
 	$plugins                   = get_plugins();
 	$active_plugins            = get_option( 'active_plugins' );
-	$disabled_plugins          = iconic_tpd_get_disabled_plugins();
-	$unfiltered_active_plugins = iconic_tpd_get_unfiltered_active_plugins( $active_plugins );
+	$disabled_plugins          = get_disabled_plugins();
+	$unfiltered_active_plugins = get_unfiltered_active_plugins( $active_plugins );
 
 	$wp_admin_bar->add_menu( array( 'id' => $menu_id, 'title' => __( 'Plugins', 'iconic-tdp' ), 'href' => '' ) );
 
@@ -74,13 +80,13 @@ function iconic_tpd_active_plugins_menu() {
 
 		$is_active = ! in_array( $path, $disabled_plugins, true );
 		$title     = $is_active ? sprintf( '<span>%s</span>', $plugin['Name'] ) : sprintf( '<del>%s</del>', $plugin['Name'] );
-		$href      = iconic_tpd_get_action_url( $path, $is_active ? 'disable' : 'enable' );
+		$href      = get_action_url( $path, $is_active ? 'disable' : 'enable' );
 
 		$wp_admin_bar->add_menu( array( 'parent' => $menu_id, 'title' => $title, 'id' => sanitize_title( $plugin['Name'] ), 'href' => $href ) );
 	}
 }
 
-add_action( 'admin_bar_menu', 'iconic_tpd_active_plugins_menu', 5000 );
+add_action( 'admin_bar_menu', __NAMESPACE__ . '\\active_plugins_menu', 5000 );
 
 /**
  * Get action URL.
@@ -90,7 +96,7 @@ add_action( 'admin_bar_menu', 'iconic_tpd_active_plugins_menu', 5000 );
  *
  * @return string
  */
-function iconic_tpd_get_action_url( $plugin_path, $type ) {
+function get_action_url( $plugin_path, $type ) {
 	$original_url = ( isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] === 'on' ? "https" : "http" ) . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
 	$url = $original_url;
@@ -107,7 +113,7 @@ function iconic_tpd_get_action_url( $plugin_path, $type ) {
  *
  * @return mixed|void
  */
-function iconic_tpd_get_unfiltered_active_plugins( $active_plugins = array() ) {
+function get_unfiltered_active_plugins( $active_plugins = array() ) {
 	global $wpdb;
 
 	static $active_plugins = array();
@@ -130,8 +136,8 @@ function iconic_tpd_get_unfiltered_active_plugins( $active_plugins = array() ) {
 /**
  * Add scroll to admin menu.
  */
-function iconic_tpd_header_styles() {
-	if ( ! iconic_tpd_is_enabled() ) {
+function header_styles() {
+	if ( ! is_enabled() ) {
 		return;
 	}
 
@@ -159,14 +165,14 @@ function iconic_tpd_header_styles() {
 	<?php
 }
 
-add_action( 'wp_head', 'iconic_tpd_header_styles' );
-add_action( 'admin_head', 'iconic_tpd_header_styles' );
+add_action( 'wp_head', __NAMESPACE__ . '\\header_styles' );
+add_action( 'admin_head', __NAMESPACE__ . '\\header_styles' );
 
 /**
  * Process action URL.
  */
-function iconic_tpd_process_action() {
-	if ( ! iconic_tpd_is_enabled() ) {
+function process_action() {
+	if ( ! is_enabled() ) {
 		return;
 	}
 
@@ -186,7 +192,7 @@ function iconic_tpd_process_action() {
 	$plugin_path = filter_input( INPUT_GET, 'plugin_path', FILTER_SANITIZE_STRING );
 	$type        = filter_input( INPUT_GET, 'type', FILTER_SANITIZE_STRING );
 
-	$temporary_deactivations = iconic_tpd_get_disabled_plugins();
+	$temporary_deactivations = get_disabled_plugins();
 
 	if ( 'enable' === $type && ! empty( $temporary_deactivations ) ) {
 		foreach ( $temporary_deactivations as $key => $value ) {
@@ -206,15 +212,15 @@ function iconic_tpd_process_action() {
 	exit;
 }
 
-add_action( 'template_redirect', 'iconic_tpd_process_action' );
-add_action( 'admin_init', 'iconic_tpd_process_action' );
+add_action( 'template_redirect', __NAMESPACE__ . '\\process_action' );
+add_action( 'admin_init', __NAMESPACE__ . '\\process_action' );
 
 /**
  * Get disabled_plugins.
  *
  * @return array
  */
-function iconic_tpd_get_disabled_plugins() {
+function get_disabled_plugins() {
 	return array_filter( get_option( 'iconic_tpd', array() ) );
 }
 
@@ -223,7 +229,7 @@ function iconic_tpd_get_disabled_plugins() {
  *
  * @return bool
  */
-function iconic_tpd_is_enabled() {
+function is_enabled() {
 	if ( ! function_exists( 'wp_get_current_user' ) ) {
 		include ABSPATH . 'wp-includes/pluggable.php';
 	}
