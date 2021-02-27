@@ -12,8 +12,8 @@
 /**
  * Deactivate plugins temporarily.
  *
- * @param $active_plugins
- * @param $option_name
+ * @param array  $active_plugins
+ * @param string $option_name
  *
  * @return mixed
  */
@@ -85,8 +85,8 @@ add_action( 'admin_bar_menu', 'iconic_tpd_active_plugins_menu', 5000 );
 /**
  * Get action URL.
  *
- * @param $plugin_path
- * @param $type
+ * @param string $plugin_path
+ * @param string $type
  *
  * @return string
  */
