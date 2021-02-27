@@ -17,8 +17,8 @@ function iconic_tpd_boot() {
 		include ABSPATH . 'wp-includes/pluggable.php';
 	}
 
+	// Boot only for administrators on the front-end.
 	if ( ! current_user_can( 'administrator' ) || is_admin() ) {
-		// TODO Display admin notice.
 		return;
 	}
 
