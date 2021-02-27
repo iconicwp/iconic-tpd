@@ -10,6 +10,29 @@
  */
 
 /**
+ * Boot as an MU plugin.
+ */
+function iconic_tpd_boot() {
+	if ( ! function_exists( 'wp_get_current_user' ) ) {
+		include ABSPATH . 'wp-includes/pluggable.php';
+	}
+
+	if ( ! current_user_can( 'administrator' ) || is_admin() ) {
+		// TODO Display admin notice.
+		return;
+	}
+
+	add_filter( 'option_active_plugins', 'iconic_tpd_option_active_plugins', 999, 2 );
+	add_action( 'admin_bar_menu', 'iconic_tpd_active_plugins_menu', 5000 );
+	add_action( 'wp_head', 'iconic_tpd_header_styles' );
+	add_action( 'admin_head', 'iconic_tpd_header_styles' );
+	add_action( 'template_redirect', 'iconic_tpd_process_action' );
+	add_action( 'admin_init', 'iconic_tpd_process_action' );
+}
+
+add_action( 'muplugins_loaded', 'iconic_tpd_boot' );
+
+/**
  * Deactivate plugins temporarily.
  *
  * @param $active_plugins
@@ -18,10 +41,6 @@
  * @return mixed
  */
 function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
-	if ( ! iconic_tpd_is_enabled() ) {
-		return $active_plugins;
-	}
-
 	static $new_active_plugins = null;
 
 	if ( ! is_null( $new_active_plugins ) ) {
@@ -43,16 +62,10 @@ function iconic_tpd_option_active_plugins( $active_plugins, $option_name ) {
 	return $new_active_plugins;
 }
 
-add_filter( 'option_active_plugins', 'iconic_tpd_option_active_plugins', 999, 2 );
-
 /**
  * Add versions to admin bar.
  */
 function iconic_tpd_active_plugins_menu() {
-	if ( ! iconic_tpd_is_enabled() ) {
-		return;
-	}
-
 	if ( ! function_exists( 'get_plugins' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
@@ -79,8 +92,6 @@ function iconic_tpd_active_plugins_menu() {
 		$wp_admin_bar->add_menu( array( 'parent' => $menu_id, 'title' => $title, 'id' => sanitize_title( $plugin['Name'] ), 'href' => $href ) );
 	}
 }
-
-add_action( 'admin_bar_menu', 'iconic_tpd_active_plugins_menu', 5000 );
 
 /**
  * Get action URL.
@@ -131,10 +142,6 @@ function iconic_tpd_get_unfiltered_active_plugins( $active_plugins = array() ) {
  * Add scroll to admin menu.
  */
 function iconic_tpd_header_styles() {
-	if ( ! iconic_tpd_is_enabled() ) {
-		return;
-	}
-
 	?>
 	<style type="text/css">
 		.ab-sub-wrapper {
@@ -159,17 +166,10 @@ function iconic_tpd_header_styles() {
 	<?php
 }
 
-add_action( 'wp_head', 'iconic_tpd_header_styles' );
-add_action( 'admin_head', 'iconic_tpd_header_styles' );
-
 /**
  * Process action URL.
  */
 function iconic_tpd_process_action() {
-	if ( ! iconic_tpd_is_enabled() ) {
-		return;
-	}
-
 	$action = filter_input( INPUT_GET, 'action', FILTER_SANITIZE_STRING );
 
 	if ( 'iconic-tpd-set' !== $action ) {
@@ -206,9 +206,6 @@ function iconic_tpd_process_action() {
 	exit;
 }
 
-add_action( 'template_redirect', 'iconic_tpd_process_action' );
-add_action( 'admin_init', 'iconic_tpd_process_action' );
-
 /**
  * Get disabled_plugins.
  *
@@ -216,17 +213,4 @@ add_action( 'admin_init', 'iconic_tpd_process_action' );
  */
 function iconic_tpd_get_disabled_plugins() {
 	return array_filter( get_option( 'iconic_tpd', array() ) );
-}
-
-/**
- * Check if TPD should be enabled.
- *
- * @return bool
- */
-function iconic_tpd_is_enabled() {
-	if ( ! function_exists( 'wp_get_current_user' ) ) {
-		include ABSPATH . 'wp-includes/pluggable.php';
-	}
-
-	return current_user_can( 'administrator' ) && ! is_admin();
 }
