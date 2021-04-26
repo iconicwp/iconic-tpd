@@ -48,7 +48,7 @@ add_filter( 'option_active_plugins', 'iconic_tpd_option_active_plugins', 999, 2 
 /**
  * Add versions to admin bar.
  */
-function iconic_tpd_active_plugins_menu() {
+function iconic_tpd_active_plugins_menu( WP_Admin_Bar $wp_admin_bar ) {
 	if ( ! iconic_tpd_is_enabled() ) {
 		return;
 	}
@@ -57,18 +57,23 @@ function iconic_tpd_active_plugins_menu() {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 	}
 
-	global $wp_admin_bar, $wp_version;
-
 	$menu_id                   = 'iconic-active-plugins';
 	$plugins                   = get_plugins();
 	$active_plugins            = get_option( 'active_plugins' );
 	$disabled_plugins          = iconic_tpd_get_disabled_plugins();
 	$unfiltered_active_plugins = iconic_tpd_get_unfiltered_active_plugins( $active_plugins );
 
-	$wp_admin_bar->add_menu( array( 'id' => $menu_id, 'title' => __( 'Plugins', 'iconic-tdp' ), 'href' => '' ) );
+	$wp_admin_bar->add_node(
+		array(
+			'id'    => $menu_id,
+			'title' => __( 'Plugins', 'iconic-tdp' ),
+			'href'  => '',
+		)
+	);
 
 	foreach ( $plugins as $path => $plugin ) {
-		if ( ! in_array( $path, $unfiltered_active_plugins, true ) ) {
+
+		if ( ! in_array( $path, $unfiltered_active_plugins, true ) || 'query-monitor/query-monitor.php' === $path ) {
 			continue;
 		}
 
@@ -76,7 +81,14 @@ function iconic_tpd_active_plugins_menu() {
 		$title     = $is_active ? sprintf( '<span>%s</span>', $plugin['Name'] ) : sprintf( '<del>%s</del>', $plugin['Name'] );
 		$href      = iconic_tpd_get_action_url( $path, $is_active ? 'disable' : 'enable' );
 
-		$wp_admin_bar->add_menu( array( 'parent' => $menu_id, 'title' => $title, 'id' => sanitize_title( $plugin['Name'] ), 'href' => $href ) );
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => $menu_id,
+				'title'  => $title,
+				'id'     => sanitize_title( $plugin['Name'] ),
+				'href'   => $href,
+			)
+		);
 	}
 }
 
