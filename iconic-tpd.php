@@ -65,7 +65,13 @@ function iconic_tpd_active_plugins_menu() {
 	$disabled_plugins          = iconic_tpd_get_disabled_plugins();
 	$unfiltered_active_plugins = iconic_tpd_get_unfiltered_active_plugins( $active_plugins );
 
-	$wp_admin_bar->add_menu( array( 'id' => $menu_id, 'title' => __( 'Plugins', 'iconic-tdp' ), 'href' => '' ) );
+	$wp_admin_bar->add_menu(
+		array(
+			'id'    => $menu_id,
+			'title' => __( 'Plugins', 'iconic-tdp' ),
+			'href'  => '',
+		)
+	);
 
 	foreach ( $plugins as $path => $plugin ) {
 		if ( ! in_array( $path, $unfiltered_active_plugins, true ) ) {
@@ -73,10 +79,18 @@ function iconic_tpd_active_plugins_menu() {
 		}
 
 		$is_active = ! in_array( $path, $disabled_plugins, true );
+		$id        = sprintf( 'iconic-tpd-%s', sanitize_title( $plugin['Name'] ) );
 		$title     = $is_active ? sprintf( '<span>%s</span>', $plugin['Name'] ) : sprintf( '<del>%s</del>', $plugin['Name'] );
 		$href      = iconic_tpd_get_action_url( $path, $is_active ? 'disable' : 'enable' );
 
-		$wp_admin_bar->add_menu( array( 'parent' => $menu_id, 'title' => $title, 'id' => sanitize_title( $plugin['Name'] ), 'href' => $href ) );
+		$wp_admin_bar->add_menu(
+			array(
+				'parent' => $menu_id,
+				'title'  => $title,
+				'id'     => $id,
+				'href'   => $href,
+			)
+		);
 	}
 }
 
