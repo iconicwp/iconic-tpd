@@ -33,3 +33,11 @@ This plugin means you can do it from anywhere with a single click.
 ## Do you accept contributions?
 
 Sure, feel free to submit a PR if anything is missing.
+
+## Changelog
+
+Next Version (-)
+[fix] Give menu items unique IDs to prevent conflicts
+
+v1.0.0 (26 Feb 2021)
+[new] Initial Release
